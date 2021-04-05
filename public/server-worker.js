@@ -13,7 +13,7 @@ const FILES_TO_CACHE = [
 
 //Install
 
-self.addEventListener("install", function (evt){
+self.addEventListener("install", function(evt){
     evt.waitUntil(
         caches.open(DATA_CACHE_NAME).then((cache) => cache.add("/api/images"))
     );
@@ -23,4 +23,23 @@ self.addEventListener("install", function (evt){
     );
 
     self.skipWaiting();
+});
+
+//Activate
+
+self.addEventListener("activate", function(evt){
+   evt.waitUntil(
+       caches.keys().then(keyList => {
+           return Promise.all(
+               keyList.map(key => {
+                   if (key !== CACHE_NAME && key !== DATA_CACHE_NAME){
+                       console.log("Removing old cache data", key);
+                       return caches.delete(key);
+                   }
+               })
+           );
+       })
+   );
+
+   self.clients.claim();
 });
